@@ -16,10 +16,10 @@
 
 (defn create-word [e]
   (let [c (-> e :content)]
-    (set/rename-keys
-     (zipmap (map :tag c)
-             (map (fn [x] (-> x :content first (or true))) c))
-     key-mapping)))
+    (-> (zipmap (map :tag c)
+                (map (fn [x] (-> x :content first (or true))) c))
+        (set/rename-keys key-mapping)
+        (update :category keyword))))
 
 (defn create-simplenlg [data]
   (let [words (->> data :content (map create-word))]
