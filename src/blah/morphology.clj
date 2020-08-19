@@ -7,6 +7,46 @@
     (or (:default-spell lex-entry) base)
     (or base (:default-spell lex-entry))))
 
+;;;;;;;;;; PRONOUN
+
+(defn pronouns
+  {:singular {:i      ["I" "you" "he" "she" "it"]
+	            :me     ["me" "you" "him" "her" "it"]
+	            :myself ["myself" "yourself" "himself" "herself" "itself"]
+	            :mine   ["mine" "yours" "his" "hers" "its"]
+	            :my     ["my" "your" "his" "her" "its"]}
+	 :plural   {:i      ["we" "you" "they" "they" "they"]
+	            :me     ["us" "you" "them" "them" "them"]
+	            :myself ["ourselves" "yourselves" "themselves" "themselves" "themselves"]
+	            :mine   ["ours" "yours" "theirs" "theirs" "theirs"]
+	            :my     ["our" "your" "their" "their" "their"]}})
+
+(def wh-pronouns #{"who" "what" "which" "where" "why" "how" "how many"})
+
+(defn pronoun [{:keys [base non-morph gender person discourse-function
+                       plural reflexive possessive passive]
+                :as   element}]
+  (if (and (not non-morph) (not (wh-pronouns base)))
+    (let [subject    (= discourse-function :subject)
+          object     (= discourse-function :object)
+          specifier  (= discourse-function :specifier)
+          complement (= discourse-function :complement)
+          position   (cond reflexive                   :myself
+                           possessive                  (if specifier :my :mine)
+                           (and subject (not passive)) :i
+                           (and object passive)        :i
+                           specifier                   :i
+                           (and complement passive)    :i
+                           :else                       :me)
+          idx        (+ (get {:first 0, :second 1, :third 2} person)
+                        (if (= person :third)
+                          (get {:masculine 0, :feminine 1, :neuter 2} gender)
+                          0))]
+      (get-in pronouns [number position idx]))
+    base))
+
+;;;;;;;;;; VERB
+
 (defn- be? [base] (= "be" (str/lower-case base)))
 
 (defn- double-pres-part-verb
@@ -157,6 +197,8 @@
           (if (be? bf)
             (if (and (= person :first) (= number :singular)) "am" "are")
             bf))))
+
+;;;;;;;;;; NOUN
 
 (defn- regular-plural-noun
   "Builds a plural for regular nouns. The rules are performed in this order:
