@@ -2,7 +2,7 @@
   (:require [blah.util :as util]
             [clojure.string :as str]))
 
-(defn- regular-plural-noun
+(defn- regular-plural
   "Builds a plural for regular nouns. The rules are performed in this order:
 
   * For nouns ending -Cy, where C is any consonant, the ending becomes -ies. For
@@ -27,7 +27,7 @@
           :else
           (str base "s"))))
 
-(defn- greco-latin-plural-noun
+(defn- greco-latin-plural
   "Builds a plural for Greco-Latin regular nouns."
   [base]
   (when base
@@ -69,8 +69,8 @@
                    bf
                    (:plural lex-entry))
                  (if (= :greco-latin-regular (:default-inflection element))
-                   (greco-latin-plural-noun bf)
-                   (regular-plural-noun bf)))
+                   (greco-latin-plural bf)
+                   (regular-plural bf)))
              bf)
         r  (if possessive
              (if (= \s (last r))

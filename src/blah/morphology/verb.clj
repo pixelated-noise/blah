@@ -4,7 +4,7 @@
 
 (defn- be? [base] (= "be" (str/lower-case base)))
 
-(defn- double-pres-part-verb
+(defn- double-pres-part
   "Builds the present participle form for verbs that follow the doubling form of
   the last consonant. `-ing` is added to the end after the last consonant is
   doubled. For example, `tug` becomes `tugging`."
@@ -43,7 +43,7 @@
           :else
           (str base "ing"))))
 
-(defn- double-past-verb
+(defn- double-past
   "Builds the past-tense form for verbs that follow the doubling form of the last
   consonant. `-ed` is added to the end after the last consonant is doubled. For
   example, `tug` becomes `tugged`."
@@ -51,7 +51,7 @@
   (when base
     (str base (last base) "ed")))
 
-(defn- regular-past-verb
+(defn- regular-past
   "Builds the past-tense form for regular verbs. The rules are performed in this
   order:
 
@@ -83,7 +83,7 @@
         :else
         (str base "ed")))
 
-(defn- present-3s-verb
+(defn- present-3s
   "Builds the third-person singular form for regular verbs. The rules are
   performed in this order:
 
@@ -124,8 +124,8 @@
           (or (:present-participle element)
               (:present-participle lex-entry)
               (if (= default-inflection :regular-double)
-                (double-pres-part-verb bf)
-                (regular-pres-part-verb bf)))
+                (double-pres-part bf)
+                (regular-pres-part bf)))
 
           (or (= :past tense) (= :past-participle form))
           (if (= :past-participle form)
@@ -133,20 +133,20 @@
                 (:past-participle lex-entry)
                 (when (be? bf) "been")
                 (if (= default-inflection :regular-double)
-                  (double-past-verb bf)
-                  (regular-past-verb bf number person)))
+                  (double-past bf)
+                  (regular-past bf number person)))
             (or (:past element)
                 (:past lex-entry)
                 (if (= default-inflection :regular-double)
-                  (double-past-verb bf)
-                  (regular-past-verb bf number person))))
+                  (double-past bf)
+                  (regular-past bf number person))))
 
           (and (= number :singular)
                (= tense :present)
                (or (not person) (= person :third)))
           (or (:present3s element)
               (and (not (be? bf)) (:present3s element))
-              (present-3s-verb))
+              (present-3s bf))
 
           :else
           (if (be? bf)

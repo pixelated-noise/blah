@@ -3,11 +3,13 @@
             [clojure.core.match :refer [match]]
             [blah.morphology.noun]
             [blah.morphology.verb]
-            [blah.morphology.pronoun]))
+            [blah.morphology.pronoun]
+            [blah.morphology.adjective]))
 
 (def noun blah.morphology.noun/noun)
 (def verb blah.morphology.verb/verb)
 (def pronoun blah.morphology.pronoun/pronoun)
+(def adjective blah.morphology.adjective/adjective)
 
 ;; (require '[blah.lexicon :as lex])
 ;; (def wolf (-> lex/lex (lex/by-base "wolf") first))
