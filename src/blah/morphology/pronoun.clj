@@ -17,6 +17,9 @@
 
 (defn pronoun [{:keys [base non-morph gender person discourse-function
                        number reflexive possessive passive]
+                :or   {passive    false
+                       reflexive  false
+                       possessive false}
                 :as   element}]
   (if (or non-morph (wh-pronouns base))
     base
