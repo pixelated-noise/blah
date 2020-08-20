@@ -1,6 +1,6 @@
 (ns blah.morphology
-  (:require [blah.word :as word]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.core.match :refer [match]]))
 
 (defn- base-form [{:keys [category base] :as element} lex-entry]
   (if (= :verb category)
@@ -9,7 +9,7 @@
 
 ;;;;;;;;;; PRONOUN
 
-(defn pronouns
+(def pronouns
   {:singular {:i      ["I" "you" "he" "she" "it"]
 	            :me     ["me" "you" "him" "her" "it"]
 	            :myself ["myself" "yourself" "himself" "herself" "itself"]
@@ -24,26 +24,28 @@
 (def wh-pronouns #{"who" "what" "which" "where" "why" "how" "how many"})
 
 (defn pronoun [{:keys [base non-morph gender person discourse-function
-                       plural reflexive possessive passive]
+                       number reflexive possessive passive]
                 :as   element}]
-  (if (and (not non-morph) (not (wh-pronouns base)))
-    (let [subject    (= discourse-function :subject)
-          object     (= discourse-function :object)
-          specifier  (= discourse-function :specifier)
-          complement (= discourse-function :complement)
-          position   (cond reflexive                   :myself
-                           possessive                  (if specifier :my :mine)
-                           (and subject (not passive)) :i
-                           (and object passive)        :i
-                           specifier                   :i
-                           (and complement passive)    :i
-                           :else                       :me)
-          idx        (+ (get {:first 0, :second 1, :third 2} person)
-                        (if (= person :third)
-                          (get {:masculine 0, :feminine 1, :neuter 2} gender)
-                          0))]
-      (get-in pronouns [number position idx]))
-    base))
+  (if (or non-morph (wh-pronouns base))
+    base
+    (let [position (match
+                     [discourse-function passive reflexive possessive]
+                     [_                  _       true      _         ] :myself
+                     [:specifier         _       _         true      ] :my
+                     [_                  _       _         true      ] :mine
+                     [:subject           false   _         _         ] :i
+                     [:object            true    _         _         ] :i
+                     [:specifier         _       _         _         ] :i
+                     [:complement        true    _         _         ] :i
+                     :else                                             :me)
+          idx      (match
+                     [person  gender    ]
+                     [:first  _         ] 0
+                     [:second _         ] 1
+                     [:third  :masculine] 2
+                     [:third  :feminine ] 3
+                     [:third  :neuter   ] 4)]
+      (get-in pronouns [number position idx]))))
 
 ;;;;;;;;;; VERB
 
