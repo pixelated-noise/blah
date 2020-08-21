@@ -30,7 +30,7 @@
         :adjective
         (adjective element lex-entry)
         :adverb
-        "TODO"
+        (adverb element lex-entry)
         base))))
 
 ;; (require '[blah.lexicon :as lex])
