@@ -6,7 +6,7 @@
   (when base
     (str base (last base) "er")))
 
-(defn- regular-comparative [base]
+(defn regular-comparative [base]
   (cond (re-matches #".*[b-z&&[^eiou]]y\b")
         (str/replace #"y\b" "ier")
 
@@ -20,7 +20,7 @@
   (when base
     (str base (last base) "est")))
 
-(defn- regular-superlative [base]
+(defn regular-superlative [base]
   (cond (re-matches #".*[b-z&&[^eiou]]y\b")
         (str/replace #"y\b" "iest")
 

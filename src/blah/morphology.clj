@@ -5,12 +5,14 @@
             [blah.morphology.noun]
             [blah.morphology.verb]
             [blah.morphology.pronoun]
-            [blah.morphology.adjective]))
+            [blah.morphology.adjective]
+            [blah.morphology.adverb]))
 
 (def noun blah.morphology.noun/noun)
 (def verb blah.morphology.verb/verb)
 (def pronoun blah.morphology.pronoun/pronoun)
 (def adjective blah.morphology.adjective/adjective)
+(def adverb blah.morphology.adverb/adverb)
 
 (defn do-morphology [{:keys [base category non-morph lex-entry]
                       :as   element}
