@@ -12,7 +12,7 @@
   (when base
     (str base (last base) "ing")))
 
-(defn- regular-pres-part-verb
+(defn- regular-pres-part
   "Builds the present participle form for regular verbs. The rules are performed
   in this order:
 
