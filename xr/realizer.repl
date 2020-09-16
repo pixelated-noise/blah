@@ -1,0 +1,93 @@
+(require '[cognitect.transcriptor :as xr :refer [check!]]
+         '[clojure.spec.alpha :as s]
+         '[blah.realizer :as sut])
+
+(sut/realize
+ {:type       :sentence
+  :components
+  [{:type        :clause
+    :subject     {:type      :noun-phrase
+                  :specifier "the"
+                  :noun      "cat"}
+    :verb-phrase {:type :verb-phrase
+                  :form :present-participle
+                  :verb "jump"}
+    :object      {:type        :preposition-phrase
+                  :preposition "on"
+                  :complements [{:type       :noun-phrase
+                                 :determiner "the"
+                                 :noun       "counter"}]}}]})
+(check! #{"The cat jumping on the counter."})
+
+(sut/realize
+ {:type       :sentence
+  :components
+  [{:type        :clause
+    :subject     {:type      :noun-phrase
+                  :specifier "the"
+                  :noun      "dog"}
+    :verb-phrase {:type :verb-phrase
+                  :form :present-participle
+                  :verb "run"}
+    :object      {:type        :preposition-phrase
+                  :preposition "on"
+                  :complement  {:type       :noun-phrase
+                                :determiner "the"
+                                :noun       "counter"}}}]})
+(check! #{"The dog running on the counter."})
+
+;; Bjorn Forcher's tests
+(sut/realize
+ {:type          :clause
+  :verb          "associate"
+  :object        "Marie"
+  :passive       true
+  :post-modifier {:type        :preposition-phrase
+                  :preposition "with"
+                  :complements ["Peter" "Paul"]}})
+(check! #{"Marie is associated with Peter and Paul"})
+
+(sut/realize
+ {:type          :clause
+  :subject       {:noun-phrase "Peter"}
+  :verb          "have"
+  :object        "something to do"
+  :post-modifier {:type        :preposition-phrase
+                  :preposition "with"
+                  :complement  "Paul"}})
+(check! #{"Peter has something to do with Paul"})
+
+;; Xin Lu's test
+
+(sut/realize
+ {:type          :clause
+  :subject       "we"
+  :verb          "consider"
+  :object        "John"
+  :post-modifier "a friend"})
+(check! #{"we consider John a friend"})
+
+;; Rachel Dwight's test
+
+(sut/realize
+ {:type        :sentence
+  :subject     {:type        :coordinated-phrase
+                :conjunction "or"
+                :coordinates [{:type      :noun-phrase
+                               :specifier "the"
+                               :noun      "patient's mother"}
+                              {:type      :noun-phrase
+                               :specifier "the"
+                               :noun      "patient's father"}]}
+  :verb-phrase {:type  :verb-phrase
+                :tense :present
+                :verb  "have"}
+  :object      {:type         :noun-phrase
+                :pre-modifier "one"
+                :noun         "changed copy"
+                :complement   {:type        :prepositional-phrase
+                               :preposition "of"
+                               :complement  {:type      :noun-phrase
+                                             :specifier "the"
+                                             :noun      "FGFR3 gene in every cell"}}}})
+(check! #{"the patient's mother or the patient's father has one changed copy of the FGFR3 gene in every cell"})

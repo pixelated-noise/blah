@@ -33,8 +33,22 @@
         (adverb element lex-entry)
         base))))
 
+(defn realize-element [element])
+
+(defn realize [elements]
+  (->> elements
+       (map realize-element)
+       (remove nil?)))
+
 ;; (require '[blah.lexicon :as lex])
 ;; (def wolf (-> lex/lex (lex/by-base "wolf") first))
 ;; (noun {:number :plural} wolf)
 ;; (noun {:number :plural :possessive true} wolf)
 ;; (noun {:possessive true} wolf)
+
+:inflected-word
+"string"
+:word
+:document
+:list
+:coordinated-phrase
