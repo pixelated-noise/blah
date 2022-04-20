@@ -12,8 +12,8 @@
     :verb-phrase {:type :verb-phrase
                   :form :present-participle
                   :verb "jump"}
-    :object      {:type        :preposition-phrase
-                  :preposition "on"
+    :object      {:type        :prepositional-phrase
+                  :head        {:preposition "on"}
                   :complements [{:type       :noun-phrase
                                  :determiner "the"
                                  :noun       "counter"}]}}]})
@@ -29,7 +29,7 @@
     :verb-phrase {:type :verb-phrase
                   :form :present-participle
                   :verb "run"}
-    :object      {:type        :preposition-phrase
+    :object      {:type        :prepositional-phrase
                   :preposition "on"
                   :complement  {:type       :noun-phrase
                                 :determiner "the"
@@ -42,7 +42,7 @@
   :verb          "associate"
   :object        "Marie"
   :passive       true
-  :post-modifier {:type        :preposition-phrase
+  :post-modifier {:type        :prepositional-phrase
                   :preposition "with"
                   :complements ["Peter" "Paul"]}})
 (check! #{"Marie is associated with Peter and Paul"})
@@ -52,7 +52,7 @@
   :subject       {:noun-phrase "Peter"}
   :verb          "have"
   :object        "something to do"
-  :post-modifier {:type        :preposition-phrase
+  :post-modifier {:type        :prepositional-phrase
                   :preposition "with"
                   :complement  "Paul"}})
 (check! #{"Peter has something to do with Paul"})
