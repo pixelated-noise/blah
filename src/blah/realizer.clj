@@ -12,7 +12,10 @@
    :w      :word
    :iw     :inflected-word})
 
-(defmulti realize (fn [{:keys [type]}] (get type-mapping type type)))
+(defmulti realize (fn [{:keys [type] :as element}]
+                    (cond (vector? element) :list
+                          (string? element) :string
+                          :else (get type-mapping type type))))
 
 ;; syntax.realize
 ;; morphology.realize
@@ -47,9 +50,58 @@
   [{:keys [children]}]
   )
 
+(defn make-pronoun [{:keys [person gender number possessive discourse-function]
+                     :as   phrase}]
+  (let [pronoun (cond
+                  (= person :first)     "I"
+                  (= person :second)    "you"
+                  (= gender :feminine)  "she"
+                  (= gender :masculine) "he"
+                  :else                 "it")]
+    ;; TODO this is actually looked up in the lexicon
+    {:base-form          pronoun
+     :lexical-category   :pronoun
+     :discourse-function (or discourse-function :specifier)
+     :person             person
+     :gender             gender
+     :possessive         possessive
+     :number             number}))
+
+(def positions {:qualitative 1
+                :colour      2
+                :classifying 3
+                :noun        4})
+
+(defn sort-np-pre-modifiers [modifiers]
+  ;;TODO - implemented in NounPhraseHelper
+  modifiers)
+
 (defmethod realize :noun-phrase
-  [{:keys [children]}]
-  )
+  [{:keys [head children elided pronomial specifier raised adjective-ordering
+           pre-modifiers complements post-modifier]
+    :as   phrase}]
+  (when (and phrase (not elided))
+    (if pronomial
+      (make-pronoun phrase)
+      {:type     :list
+       :children [(-> (realize specifier) (assoc :discourse-function :specifier))
+                  ;; pre-modifiers
+                  (if adjective-ordering
+                    (realize (sort-np-pre-modifiers pre-modifiers))
+                    (realize pre-modifiers))
+                  ;; head noun
+                  (merge
+                   (select-keys phrase [:elided :gender :acronym :number :person :possessive :passive])
+                   {:discourse-function :subject}
+                   (realize head))
+                  ;; complements
+                  (merge
+                   {:discourse-function :complement}
+                   (realize complements))
+                  ;; post-modifier
+                  (merge
+                   {:discourse-function :complement}
+                   (realize post-modifier))]})))
 
 (defmethod realize :clause-phrase
   [{:keys [children]}]
@@ -70,12 +122,12 @@
 (declare realize-complements)
 (declare realize-head)
 
-(defn realize [syntax-processor phrase]
+(defn realize [phrase]
   (-> phrase
-      (realize-list (pre-modifiers phrase) syntax-processor :pre-modifier)
-      (realize-head syntax-processor)
-      (realize-complements syntax-processor)
-      (realize-list (post-modifiers phrase) syntax-processor :post-modifier)))
+      (realize-list (pre-modifiers phrase) :pre-modifier)
+      (realize-head)
+      (realize-complements)
+      (realize-list (post-modifiers phrase) :post-modifier)))
 
 ;; NLGElement
 {:category    ""
@@ -85,23 +137,6 @@
  :realization ""
  :factory     nil
  :children    []}
-
-;; Hierarchy
-
-;; NLGElement
-;;   PhraseElement
-;;     PPPhraseSpec
-;;     SPhraseSpec
-;;     NPPhraseSpec
-;;     AdjPhraseSpec
-;;     AdvPhraseSpec
-;;     VPPhraseSpec
-;;   DocumentElement
-;;   StringElement
-;;   ListElement
-;;   InflectedWordElement
-;;   CoordinatedPhraseElement
-;;   WordElement
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; ElementCategory
