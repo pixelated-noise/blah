@@ -8,7 +8,7 @@
   [{:type        :clause
     :subject     {:type      :noun-phrase
                   :specifier "the"
-                  :noun      "cat"}
+                  :head      "cat"}
     :verb-phrase {:type :verb-phrase
                   :form :present-participle
                   :verb "jump"}

@@ -12,15 +12,26 @@
    :w      :word
    :iw     :inflected-word})
 
-(defmulti realize (fn [{:keys [type] :as element}]
+(defn skip-nils [v]
+  (vector (remove nil? v)))
+
+(defmulti realize (fn [element]
                     (cond (vector? element) :list
                           (string? element) :string
-                          :else (get type-mapping type type))))
+                          :else (let [type (:type element)]
+                                  (get type-mapping type type)))))
 
 ;; syntax.realize
 ;; morphology.realize
 ;; orthography.realize
 ;; formatter.realize
+
+(defmethod realize nil [_] nil)
+
+(defmethod realize :string
+  [s]
+  {:category    :canned-text ;;TODO
+   :realization s})
 
 (defmethod realize :coordinated-phrase
   [{:keys [children]}]
@@ -84,32 +95,38 @@
     (if pronomial
       (make-pronoun phrase)
       {:type     :list
-       :children [(-> (realize specifier) (assoc :discourse-function :specifier))
-                  ;; pre-modifiers
-                  (if adjective-ordering
-                    (realize (sort-np-pre-modifiers pre-modifiers))
-                    (realize pre-modifiers))
-                  ;; head noun
-                  (merge
-                   (select-keys phrase [:elided :gender :acronym :number :person :possessive :passive])
-                   {:discourse-function :subject}
-                   (realize head))
-                  ;; complements
-                  (merge
-                   {:discourse-function :complement}
-                   (realize complements))
-                  ;; post-modifier
-                  (merge
-                   {:discourse-function :complement}
-                   (realize post-modifier))]})))
+       :children (skip-nils
+                  [(-> (realize specifier) (assoc :discourse-function :specifier))
+                   ;; pre-modifiers
+                   (when pre-modifiers
+                     (if adjective-ordering
+                       (realize (sort-np-pre-modifiers pre-modifiers))
+                       (realize pre-modifiers)))
+                   ;; head noun
+                   (merge
+                    (select-keys phrase [:elided :gender :acronym :number :person :possessive :passive])
+                    {:discourse-function :subject}
+                    (realize head))
+                   ;; complements
+                   (when complements
+                     (merge
+                      {:discourse-function :complement}
+                      (realize complements)))
+                   ;; post-modifier
+                   (when post-modifier
+                     (merge
+                      {:discourse-function :complement}
+                      (realize post-modifier)))])})))
 
 (defmethod realize :clause-phrase
   [{:keys [children]}]
   )
 
 (defmethod realize :list
-  [{:keys [children]}]
-  [:list (map realize children)])
+  [el]
+  (update el :list #(->> %
+                         (map realize)
+                         skip-nils)))
 
 (defmethod realize :document
   [{:keys [children]}]
@@ -122,12 +139,13 @@
 (declare realize-complements)
 (declare realize-head)
 
-(defn realize [phrase]
-  (-> phrase
-      (realize-list (pre-modifiers phrase) :pre-modifier)
-      (realize-head)
-      (realize-complements)
-      (realize-list (post-modifiers phrase) :post-modifier)))
+(comment
+  (defn realize [phrase]
+    (-> phrase
+        (realize-list (pre-modifiers phrase) :pre-modifier)
+        (realize-head)
+        (realize-complements)
+        (realize-list (post-modifiers phrase) :post-modifier))))
 
 ;; NLGElement
 {:category    ""
