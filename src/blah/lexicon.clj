@@ -36,7 +36,7 @@
   (-> (create-simplenlg (xml/parse s))
       (assoc :source s)))
 
-(defn by-base [lexicon base]
+(defn lookup-by-base [lexicon base]
   (get-in lexicon [:by-base base]))
 
 ;;(def lex (parse-simplenlg (io/file "/Users/sideris/devel/third-party/simplenlg/src/main/resources/default-lexicon.xml")))

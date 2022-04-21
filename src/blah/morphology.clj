@@ -19,7 +19,7 @@
                      lexicon]
   (if non-morph
     base
-    (let [lex-entry (or lex-entry (lexicon/by-base base))]
+    (let [lex-entry (or lex-entry (lexicon/lookup-by-base base))]
       (case category
         :pronoun
         (pronoun element)
