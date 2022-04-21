@@ -43,9 +43,9 @@ Order: syntax, morphology, orthography, formatter (text or HTML)
 
 - `SyntaxProcessor` - translates phrases into lists of words
 
-- `MorphologyProcessor` - inflects words form the base form depending on
-  thefeatures applied to the word. For example, "kiss" is inflected to "kissed"
-  for past tense, "dog" is inflected to "dogs" for pluralisation.
+- `MorphologyProcessor` - inflects words form the base form depending on the
+  features applied to the word. For example, "kiss" is inflected to "kissed" for
+  past tense, "dog" is inflected to "dogs" for pluralisation.
 
 - `OrthographyProcessor`
 
@@ -66,3 +66,11 @@ Order: syntax, morphology, orthography, formatter (text or HTML)
   - Adding appropriate new line breaks for ease-of-reading.
   - Adding list items with ' * '.
   - Adding numbers for enumerated lists (e.g., "1.1 - ", "1.2 - ", etc.)
+
+## Implementation criticism
+
+- The subclass of `PhraseElement` but also `PhraseCategory` both determine the
+  different types of phrase, and their names are inconsistent
+- Element constructors do a lot of work to help the user construct the tree
+  easily, for example SPhraseSpec.addModifier() uses heuristics to decide where
+  it goes (pre- or post-). It's like the coercers that data macros use.
