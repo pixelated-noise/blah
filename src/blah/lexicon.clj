@@ -1,7 +1,8 @@
 (ns blah.lexicon
   (:require [clojure.xml :as xml]
             [clojure.java.io :as io]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [clojure.string :as str]))
 
 (def ^:dynamic *current*)
 
@@ -26,8 +27,35 @@
    :glreg             :greco-latin-regular
    :inv               :invariant})
 
+(defn- substring [s start end]
+  (when s
+    (if (pos? end)
+      (subs s start end)
+      (subs s start (+ (.length s) end)))))
+
 (defn- get-form [base suffix]
-  (str base suffix)) ;;TODO see XMLLexicon.getForm()
+  (-> (cond
+         ;; rule 1 - convert final "y" to "ie" if suffix does not start with "i"
+		     ;; eg, cry + s = cries , not crys
+         (and (str/ends-with? base "y") (not (str/starts-with? suffix "i")))
+         (str (substring base 0 -1) "ie")
+
+         ;; rule 2 - drop final "e" if suffix starts with "e" or "i"
+		     ;; eg, like+ed = liked, not likeed
+         (and (str/ends-with? base "e") (or (str/starts-with? suffix "e")
+                                            (str/starts-with? suffix "i")))
+         (substring base 0 -1)
+
+         ;; rule 3 - insert "e" if suffix is "s" and base ends in s, x, z, ch, sh
+		     ;; eg, watch+s -> watches, not watchs
+         (and (str/starts-with? suffix "s") (or (str/ends-with? base "s")
+                                                (str/ends-with? base "x")
+                                                (str/ends-with? base "z")
+                                                (str/ends-with? base "ch")
+                                                (str/ends-with? base "sh")))
+         (str base "e"))
+
+       (str suffix)))
 
 (defn- variant [w k suffix]
   (or (w k) (get-form (:base w) suffix)))
