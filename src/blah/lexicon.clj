@@ -112,6 +112,14 @@
        (filter #(= category (:lexical-category %)) words)
        words))))
 
+(defn lookup
+  ([lexicon base]
+   (lookup lexicon base nil))
+  ([lexicon base category]
+   (or (first (get-by-base lexicon base category))
+       (first (get-by-variant lexicon base category))
+       (get-by-id lexicon base category)))) ;; TODO consider removing the ID lookup from here
+
 (defn create-simplenlg [data]
   (let [words   (->> data :content (map create-word))
         lexicon {:by-id      (zipmap (map :id words) words)
